@@ -6,11 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "cknow/laravel-money": "^8.4",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "spatie/laravel-event-sourcing": "^7.12"
+        "spatie/laravel-event-sourcing": "^7.12",
+        "spatie/laravel-queueable-action": "^2.16"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
