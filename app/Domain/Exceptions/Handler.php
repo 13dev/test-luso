@@ -3,6 +3,7 @@
 namespace App\Domain\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -23,8 +24,22 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->reportable(function (ExternalOrderApiRequestFailedException $e) {
+            logger()?->error('[Order API] Request failed', $e->context());
         });
+    }
+
+
+    public function render($request, Throwable $exception): JsonResponse
+    {
+        if ($exception instanceof ExternalOrderApiRequestFailedException) {
+            return response()->json([
+                'message' => 'There was a problem processing your order.',
+                'error' => $exception->getMessage(),
+                'details' => app()->isProduction() ? null : $exception->context(),
+            ], 500);
+        }
+
+        return parent::render($request, $exception);
     }
 }
