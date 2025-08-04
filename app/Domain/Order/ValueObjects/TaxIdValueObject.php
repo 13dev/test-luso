@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Order\ValueObjects;
 
 use Stringable;
 
-class TaxIdValueObject implements Stringable
+final class TaxIdValueObject implements Stringable
 {
     public function __construct(private readonly string $value)
     {

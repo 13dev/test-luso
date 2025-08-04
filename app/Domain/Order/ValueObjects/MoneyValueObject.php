@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Order\ValueObjects;
+declare(strict_types=1);
 
+namespace App\Domain\Order\ValueObjects;
 
 use Cknow\Money\Money;
 
@@ -25,5 +26,9 @@ final class MoneyValueObject
     public function getAmount(): int
     {
         return $this->money->getAmount();
+    }
+    public function getCurrency(): string
+    {
+        return $this->money->getCurrency();
     }
 }
