@@ -1,5 +1,7 @@
 <?php
 
+use App\Infrastructure\Order\OrderProjector;
+
 return [
 
     /*
@@ -22,6 +24,8 @@ return [
      * Projectors can be registered in this array or a service provider.
      */
     'projectors' => [
+
+        OrderProjector::class,
         // App\Projectors\YourProjector::class
     ],
 
