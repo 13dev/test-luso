@@ -11,10 +11,12 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "league/uri": "^7.5",
         "spatie/laravel-event-sourcing": "^7.12",
         "spatie/laravel-queueable-action": "^2.16"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.1",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
