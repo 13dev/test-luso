@@ -1,0 +1,17 @@
+services:
+  # image project
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    #entrypoint: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ../:/var/www:z
+    networks:
+      - laravel
+    ports:
+      - "8000:8000"
+
+networks:
+  laravel:
+    driver: bridge

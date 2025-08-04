@@ -1,0 +1,55 @@
+FROM php:8.2-alpine3.22
+
+# Set up a www-data user with UID 1000 and GID 1000
+ARG NAME=www-data
+ENV NAME ${NAME}
+RUN deluser www-data && \
+    adduser -s /bin/sh -D -u 1000 -g '' ${NAME} ${NAME} && \
+    chown -R ${NAME}:${NAME} /home/${NAME}
+
+# Install Alpine packages
+RUN apk add --no-cache --virtual build-deps autoconf g++ libtool make linux-headers && \
+    apk add --no-cache git libzip-dev sqlite supervisor bash
+
+# Install PHP Extensions for SQLite
+RUN docker-php-ext-install pdo zip
+
+
+# Increase the default memory limit
+RUN echo 'memory_limit = 1096M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Add Composer to the PATH
+ENV PATH="$PATH:/usr/local/bin:/home/${NAME}/.composer/vendor/bin"
+
+# Ensure ~/.composer belongs to user
+RUN mkdir /home/${NAME}/.composer && chown -R ${NAME}:${NAME} /home/${NAME}
+
+# Install XDebug extension for code coverage support
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+COPY php/xdebug.ini /usr/local/etc/php/conf.d
+
+# Clean up apk dependencies
+RUN apk del build-deps
+
+# Set permissions for Laravel storage and logs directory
+RUN mkdir -p /var/www/storage/logs && chown -R ${NAME}:${NAME} /var/www/storage && chmod -R 775 /var/www/storage && chmod -R 775 /var/www/storage/logs
+
+# Create Supervisor directories and config
+RUN mkdir -p /etc/supervisor/conf.d && \
+    mkdir -p /var/log/supervisor && \
+    chown -R ${NAME}:${NAME} /var/log/supervisor
+
+# Copy Supervisor configuration
+COPY supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+
+# Set the active user
+USER ${NAME}
+
+# Set the active directory
+WORKDIR /var/www
+
+# Start supervisord
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
