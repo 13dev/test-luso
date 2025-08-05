@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Infrastructure\ExternalOrderApi;
 
 use App\Application\Contracts\ExternalOrderApiInterface;
-use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV1RequestResource;
-use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV1ResponseResource;
-use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV2RequestResource;
-use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV2ResponseResource;
+use App\Infrastructure\ExternalOrderApi\DTOs\ExternalOrderV1RequestData;
+use App\Infrastructure\ExternalOrderApi\DTOs\ExternalOrderV1ResponseData;
+use App\Infrastructure\ExternalOrderApi\DTOs\ExternalOrderV2RequestResource;
+use App\Infrastructure\ExternalOrderApi\DTOs\ExternalOrderV2ResponseResource;
 use InvalidArgumentException;
 use League\Uri\Uri;
 
@@ -18,8 +18,8 @@ class ExternalOrderApiFactory
     {
         return match ($version) {
             'v1' => new ExternalApiClient(
-                ExternalOrderV1RequestResource::class,
-                ExternalOrderV1ResponseResource::class,
+                ExternalOrderV1RequestData::class,
+                ExternalOrderV1ResponseData::class,
                 Uri::new(config('external_orders.v1.uri')),
             ),
             'v2' => new ExternalApiClient(

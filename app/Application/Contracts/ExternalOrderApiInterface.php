@@ -5,11 +5,10 @@ declare(strict_types=1);
 
 namespace App\Application\Contracts;
 
-use Illuminate\Http\Resources\Json\JsonResource;
-use League\Uri\Uri;
+use Spatie\LaravelData\Contracts\BaseData;
 
 interface ExternalOrderApiInterface
 {
-    public function call(array $data): JsonResource;
+    public function call(array $data): BaseData;
 
 }
