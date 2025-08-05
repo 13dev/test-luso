@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\ExternalOrderApi;
 
 use App\Application\Contracts\ExternalOrderApiInterface;
@@ -14,9 +16,7 @@ final class ExternalApiClient implements ExternalOrderApiInterface
     public function __construct(
         /** @var Data */
         private readonly string $responseResource,
-
         private readonly UriInterface $url,
-
     ) {
     }
 

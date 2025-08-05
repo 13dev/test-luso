@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\ExternalOrderApi\DTOs;
 
 use App\Domain\Order\Casts\CustomerCastAndTransformer;

@@ -1,66 +1,283 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# External Order API Integration (Laravel + DDD)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This project integrates with an **External Order API** that exists in **two different versions**:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **V1 (REST)**: A traditional JSON-based structure.
+- **V2 (JSON:API)**: Follows the JSON:API specification.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Both versions serve the same business purpose (handling orders) but:
+- Accept **different request formats**.
+- Return **different response formats**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+We handle this with a **serializer-based strategy** so that the **domain layer** never depends on API format details.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Goals
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Clean separation of concerns**:
+    - Domain layer works only with **value objects, aggregates, and DTOs**.
+    - Infrastructure layer handles **API-specific transformations and communication**.
+- **Runtime version switching**: Choose V1 or V2 at runtime.
+- **Maintainability**: Adding a new API version requires minimal changes.
+- **Testability**: Serializers and mappers can be tested independently.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Folder Structure
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+app
+├── Application
+│   ├── Contracts
+│   │   └── ExternalOrderApiInterface.php  # Common API contract
+│   ├── Http
+│   │   └── Controllers
+│   │       └── OrderController.php        # Entry point for order actions
+│   └── VersionResolver.php                 # Decides which API version to use
+│
+├── Domain
+│   ├── Order
+│   │   ├── AggregateRoots
+│   │   ├── ValueObjects
+│   │   ├── Enums
+│   │   ├── Events
+│   │   ├── Casts
+│   │   └── Order.php
+│   └── Customer
+│       └── Customer.php
+│
+└── Infrastructure
+    ├── DTOs
+    │   └── InternalOrderData.php           # Internal representation
+    ├── ExternalOrderApi
+    │   ├── DTOs                            # V1/V2 request & response DTOs
+    │   ├── ExternalApiClient.php           # Handles HTTP calls
+    │   └── ExternalOrderApiFactory.php     # Creates correct serializer/client
+    ├── Mappers
+    │   └── OrderApiDataMapper.php          # Maps between domain and API DTOs
+    └── Providers
+```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Data Flow
 
-## Contributing
+1. **Incoming Request**  
+   `OrderController` receives input from an HTTP request.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Version Resolution**  
+   `VersionResolver` decides whether to use API **V1** or **V2**.
 
-## Code of Conduct
+3. **Factory Selection**  
+   `ExternalOrderApiFactory` returns an instance of `ExternalOrderApiInterface` implementation for the chosen version.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Serialization**  
+   The selected API service uses a serializer/mapper to:
+    - Transform **`InternalOrderData`** → **External API DTO** for requests.
+    - Transform **External API Response DTO** → **`ExternalOrderV1ResponseData`** for domain use.
 
-## Security Vulnerabilities
+5. **HTTP Communication**  
+   `ExternalApiClient` sends the serialized data to the external API and returns a ready to use object.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Deserialization**  
+   The API service converts the raw JSON into a **version-agnostic domain DTO**.
 
-## License
+7. **Domain Processing**  
+   The domain layer (aggregates, value objects) processes the data without knowing the API format.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Example Workflow
+
+```php
+// Step 1: Determine which API version to use at runtime (V1 or V2)
+$version = $this->versionResolver->resolve();
+
+// Step 2: Convert internal order data into the correct API request format
+//         The mapper transforms based on the selected version
+$mapper = OrderApiDataMapper::map($data, $version);
+
+// Step 3: Resolve the correct API client for the version and make the API call
+//         This returns an external orders DTO (version-agnostic at this point)
+$externalOrders = ExternalOrderApiFactory::resolve($version)->call($mapper);
+
+// Step 4: Use the domain aggregate root to persist order data internally
+//         This step applies domain rules and records domain events
+OrderAggregateRoot::retrieve($externalOrders->id)
+    ->create(
+        customer: $data->customer,       
+        total: $data->total,                  
+        items: $data->items->toArray()     
+    );
+
+// Step 5: Return the result from the external API
+//         This is usually returned to the controller or service caller
+return $externalOrders;
+```
+
+---
+
+
+# Notes on Current State & Missing Pieces
+
+## Known Limitations
+
+1. **OrderProjector**
+    - This class is unfinished, some date isn't being stored.
+
+2. **No Automated Tests Yet**
+    - Due to time, **unit tests and integration tests** are missing.
+    - Critical areas to test in the future:
+        - **Mappers**: Ensure correct data transformation for each API version.
+        - **External API mock**: Simulate responses for both V1 and V2.
+        - **Domain calculations**: Verify total amount calculations match business rules.
+
+3. **API Mocking & Verification of Totals**
+    - For stable local development, the external API should be **mocked**.
+    - Mocking allows:
+        - Fast test execution.
+        - Verifying total calculations without calling the real API.
+        - Running the app offline.
+
+4. **Always Return JSON Responses**
+    - Currently missing a **global handler** or **middleware** that forces JSON responses.
+    - Without this, Laravel might return HTML for some exceptions.
+    - Add a change in `Handler.php` or global middleware to always return JSON.
+
+5. **Version Switching via Header**
+    - API version is chosen at runtime by sending the header:
+      ```
+      X-Order-Version: 1   // for V1 (REST)
+      X-Order-Version: 2   // for V2 (JSON:API)
+      ```
+    - `VersionResolver` reads this header and decides which API client to use.
+
+6. Project uses DOCKER with embedded php server (dev only). The Docker image user supervisord, so we can centralize the processes.
+---
+
+## Completed for Project Start
+
+- **Makefile** (or `make up`) command is ready to bootstrap the environment.
+- **PHP-CS-Fixer** integrated for code style consistency:
+  ```bash
+  composer php-cs-fixer
+  ```
+- setup env, example:
+```dotenv
+DB_CONNECTION=sqlite
+DB_DATABASE=./database.sqlite
+DB_FOREIGN_KEYS=true
+
+QUEUE_CONNECTION=database
+
+EXTERNAL_ORDERS_API_V1_URI=https://dev.micros.services/api/v1/order
+EXTERNAL_ORDERS_API_V2_URI=https://dev.micros.services/api/v2/order
+```
+
+- Make a POST Request to: http://localhost:8000/api/orders
+  With body:
+```json
+
+```
+{
+    "customer": {"full_name": "João Almeida", "nif": "504321331"},
+    "total": {"amount": "100.0", "currency": "EUR"},
+    "items": [
+        { "sku": "PEN-16GB", "qty": 3, "unit_price": "9.90" },
+        { "sku": "NOTE-A5", "qty": 10, "unit_price": "12.00" }
+    ]
+}
+- Header: 'X-Order-Version' default is to v1.
+- Voila, the data is magically serialized to the external services.
+---
+DB_CONNECTION=sqlite
+DB_DATABASE=./database.sqlite
+DB_FOREIGN_KEYS=true
+
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_HOST=
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+PUSHER_APP_CLUSTER=mt1
+
+VITE_APP_NAME="${APP_NAME}"
+VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+VITE_PUSHER_HOST="${PUSHER_HOST}"
+VITE_PUSHER_PORT="${PUSHER_PORT}"
+VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
+VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+
+
+EXTERNAL_ORDERS_API_V1_URI=https://dev.micros.services/api/v1/order
+EXTERNAL_ORDERS_API_V2_URI=https://dev.micros.services/api/v2/order
+## Design Choices
+
+### Laravel Data Instead of JSON Resources
+- **Reason**:
+    - Laravel's `JsonResource` is tied to HTTP responses, which is **application-layer specific**.
+    - In DDD, we want **data transformations to exist independently** of the HTTP layer.
+    - [Laravel Data](https://github.com/spatie/laravel-data) allows us to:
+        - Define **immutable DTOs**.
+        - Use them in **both incoming (request) and outgoing (response)** transformations.
+        - Keep mappings reusable between the application and infrastructure layers.
+    - This ensures that mappers work the same way **whether called from a controller or a CLI command**.
+
+---
+
+## Ubiquitous Language
+
+The term **`ExternalOrderApi`** references the externals apis from the **requirements document** and used consistently across.
+
+This matches **DDD's Ubiquitous Language principle**, keeping terminology aligned with the business and avoiding ambiguous names.
+
+---
+
+## Next Steps
+
+1. Finish Projector and the flow of the event-sourcing.
+2. Add:
+    - API mocks for both V1 and V2.
+    - Unit tests for mappers and version resolution.
+    - Calculation verification tests for totals.
+3. Implement a **global JSON response handler**.
+4. OpenAPI integration.
+5. Add a load balancing for balance the requests (maybe by health and weights).
+6. Use NGINX as reverse proxy or traefik
+7. Rate limiting.
+8. Add ci/cd.
+9. Cleanup some files (frontend, etc...)
+
+

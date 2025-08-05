@@ -15,10 +15,10 @@ class OrderProjector extends Projector
 {
     public function onOrderCreated(OrderCreated $event): void
     {
-        $customer = Customer::where('nif', $event->customer->nif)->firstOrCreate([
-            'name' => $event->customer->name,
-            'nif' => $event->customer->nif,
-        ]);
+        $customer = Customer::firstOrCreate(
+            ['nif' => (string) $event->customer->nif],
+            ['name' => $event->customer->name]
+        );
 
         Order::create([
             'uuid' => $event->aggregateRootUuid(),

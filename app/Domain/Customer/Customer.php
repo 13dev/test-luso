@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Customer;
 
 use App\Domain\Order\Order;
@@ -11,10 +13,10 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $attributes = [
-        'id',
-        'tax_id',
+
+    protected $fillable = [
         'name',
+        'tax_id',
     ];
 
     public function orders()

@@ -7,7 +7,6 @@ namespace App\Domain\Order\ValueObjects;
 use Cknow\Money\Money;
 use Money\Currency;
 
-
 final class MoneyValueObject
 {
     public function __construct(

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\ExternalOrderApi\DTOs;
 
 use App\Domain\Order\Casts\MoneyCastAndTransformer;
@@ -17,10 +19,8 @@ class ExternalOrderV2ItemData extends Data
     public function __construct(
         #[Required, StringType]
         public string $sku,
-
         #[Required, IntegerType, Min(1)]
         public int $qty,
-
         #[Computed, WithCastAndTransformer(MoneyCastAndTransformer::class)]
         public MoneyValueObject $price,
     ) {

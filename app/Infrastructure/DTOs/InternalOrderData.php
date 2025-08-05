@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\DTOs;
 
 use App\Domain\Order\Casts\CustomerCastAndTransformer;
@@ -23,14 +25,11 @@ class InternalOrderData extends Data
     public function __construct(
         #[Required, WithCastAndTransformer(CustomerCastAndTransformer::class, ['name' => 'customer.full_name', 'nif' => 'customer.nif'])]
         public CustomerValueObject $customer,
-
         #[Required, WithCastAndTransformer(MoneyCastAndTransformer::class)]
         public MoneyValueObject $total,
-
         #[Required, DataCollectionOf(ExternalOrderV1ItemData::class)]
         public DataCollection $items
-    )
-    {
+    ) {
 
     }
 }

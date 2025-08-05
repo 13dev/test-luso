@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\ExternalOrderApi\DTOs;
 
 use App\Domain\Order\Casts\CustomerCastAndTransformer;
@@ -12,7 +14,6 @@ use Spatie\LaravelData\DataCollection;
 
 class ExternalOrderV1ResponseData extends Data
 {
-
     #[MapInputName("data.uuid")]
     public string $id;
 

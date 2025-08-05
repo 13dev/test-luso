@@ -1,6 +1,8 @@
 <?php
-namespace App\Domain\Order\Casts;
 
+declare(strict_types=1);
+
+namespace App\Domain\Order\Casts;
 
 use App\Domain\Order\ValueObjects\MoneyValueObject;
 use Spatie\LaravelData\Casts\Cast;

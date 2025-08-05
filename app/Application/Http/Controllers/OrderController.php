@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-
     public function __construct(private readonly VersionResolver $versionResolver)
     {
     }
@@ -28,11 +27,12 @@ class OrderController extends Controller
 
         $mapper = OrderApiDataMapper::map($data, $version);
 
-
         $externalOrders = ExternalOrderApiFactory::resolve($version)->call($mapper);
 
         OrderAggregateRoot::retrieve($externalOrders->id)
-            ->create(customer: $data->customer, total: $data->total, items: $data->items->toArray());
+            ->create(customer: $data->customer, total: $data->total, items: $data->items->toArray())
+            ->persist();
+
 
         return $externalOrders;
 
