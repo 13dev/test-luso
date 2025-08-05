@@ -7,6 +7,7 @@ namespace App\Domain\Order\ValueObjects;
 use Cknow\Money\Money;
 use Money\Currency;
 
+
 final class MoneyValueObject
 {
     public function __construct(
@@ -14,15 +15,16 @@ final class MoneyValueObject
     ) {
     }
 
-    public static function fromDecimal(float $amount, string $currency = 'EUR'): self
+    public static function from(string|float $amount, string $currency = 'EUR'): self
     {
-        return new self(money($amount, $currency));
+        return new self(money((float) $amount, $currency));
     }
 
     public function toDecimal(): string
     {
         return $this->money->formatByDecimal();
     }
+
 
     public function getAmount(): string
     {
@@ -32,4 +34,5 @@ final class MoneyValueObject
     {
         return $this->money->getCurrency();
     }
+
 }
