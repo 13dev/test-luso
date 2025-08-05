@@ -1,4 +1,4 @@
-# External Order API Integration (Laravel + DDD)
+# External Order API Integration (Laravel + DDD + Event Sourcing)
 
 ## Overview
 
