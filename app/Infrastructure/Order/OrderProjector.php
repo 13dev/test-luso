@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Order;
 
+use App\Domain\Customer\Customer;
 use App\Domain\Order\Enums\OrderStatusEnum;
 use App\Domain\Order\Events\OrderCreated;
 use App\Domain\Order\Events\OrderIntegrated;
@@ -14,14 +15,19 @@ class OrderProjector extends Projector
 {
     public function onOrderCreated(OrderCreated $event): void
     {
+        $customer = Customer::where('nif', $event->customer->nif)->firstOrCreate([
+            'name' => $event->customer->name,
+            'nif' => $event->customer->nif,
+        ]);
+
         Order::create([
             'uuid' => $event->aggregateRootUuid(),
-            'customer_name' => $event->customer->name,
-            'customer_nif' => (string) $event->customer->nif,
+            'customer_id' => $customer->id,
             'total' => $event->total->toDecimal(),
             'items' => $event->items,
             'status' => OrderStatusEnum::Created,
         ]);
+
     }
 
     public function onOrderIntegrated(OrderIntegrated $event): void

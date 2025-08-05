@@ -19,7 +19,14 @@ class OrderApiDataMapper
             'customer_name' => $data->customer->name,
             'customer_nif' => (string) $data->customer->nif,
             'total' => $data->total->getAmount(),
-            'items' => $data->items->toArray(),
+            'items' => collect($data->items)
+                ->map(function ($item) {
+                    return [
+                        'sku' => $item['sku'],
+                        'qty' => $item['qty'],
+                        'unit_price' => $item['unit_price']['amount'],
+                    ];
+                })->toArray(),
             'currency' => $data->total->getCurrency(),
         ];
 

@@ -4,6 +4,8 @@ namespace App\Domain\Order\Casts;
 
 use App\Domain\Order\ValueObjects\CustomerValueObject;
 use App\Domain\Order\ValueObjects\TaxIdValueObject;
+use Arr;
+use Spatie\LaravelData\Attributes\WithCastAndTransformer;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Support\Creation\CreationContext;
 use Spatie\LaravelData\Support\DataProperty;
@@ -18,8 +20,9 @@ class CustomerCastAndTransformer implements Cast, Transformer
         array $properties,
         CreationContext $context
     ): CustomerValueObject {
+        $props = $property->attributes->first(WithCastAndTransformer::class)->arguments[0] ?? $value;
 
-        return new CustomerValueObject($value['full_name'], new TaxIdValueObject($value['nif']));
+        return new CustomerValueObject(Arr::get($properties, $props['name']), new TaxIdValueObject(Arr::get($properties, $props['nif'])));
 
     }
 

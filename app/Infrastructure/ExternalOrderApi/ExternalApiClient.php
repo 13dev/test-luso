@@ -25,6 +25,7 @@ final class ExternalApiClient implements ExternalOrderApiInterface
      */
     public function call(array $data): BaseData
     {
+
         $response = Http::withHeaders(['Content-Type' => 'application/json', 'Accept' => 'application/json'])
             ->post(
                 url: $this->url->toString(),
@@ -40,8 +41,6 @@ final class ExternalApiClient implements ExternalOrderApiInterface
             );
         }
 
-
-        dd($response->json());
         return $this->responseResource::from($response->json());
 
     }

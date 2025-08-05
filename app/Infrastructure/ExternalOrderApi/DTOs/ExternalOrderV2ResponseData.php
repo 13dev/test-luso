@@ -2,29 +2,37 @@
 
 namespace App\Infrastructure\ExternalOrderApi\DTOs;
 
+use App\Domain\Order\Casts\CustomerCastAndTransformer;
+use App\Domain\Order\ValueObjects\CustomerValueObject;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Attributes\WithCastAndTransformer;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 
 class ExternalOrderV2ResponseData extends Data
 {
-    #[MapInputName("data.attributes.uuid")]
+    #[MapInputName("data.id")]
     public string $id;
 
-    #[MapOutputName("data.id")]
-    public string $number;
+    #[MapInputName("data.attributes.status")]
+    public string $status;
 
-    #[MapOutputName("data.attributes.status")]
-    public array $status;
+    #[MapInputName("data.attributes.summary.total")]
+    public string $total;
 
-    #[MapOutputName("data.attributes.total")]
-    public array $total;
+    #[MapInputName("data.attributes.summary.currency")]
+    public string $currency;
 
-    #[MapOutputName("data.attributes.currency")]
-    public array $currency;
+    #[MapInputName("data.attributes.lines"), DataCollectionOf(ExternalOrderV2ItemData::class)]
+    public DataCollection $items;
 
-    #[MapOutputName("data.attributes.created_at")]
-    public array $createdAt;
+    #[MapInputName("data.attributes.customer")]
+    #[WithCastAndTransformer(CustomerCastAndTransformer::class, ['name' => 'data.attributes.customer.name', 'nif' => 'data.attributes.customer.nif'])]
+    public CustomerValueObject $customer;
+
+    #[MapInputName("data.attributes.created_at")]
+    public string $createdAt;
 
 
 }
