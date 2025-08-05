@@ -20,8 +20,11 @@ class MoneyCastAndTransformer implements Cast, Transformer
         return MoneyValueObject::from($value);
     }
 
-    public function transform(DataProperty $property, $value, TransformationContext $context): string
+    public function transform(DataProperty $property, $value, TransformationContext $context): array
     {
-        return number_format($value->getAmount(), 2) . ' ' . $value->getCurrency();
+        return [
+            'currency' => $value->getCurrency(),
+            'amount' => $value->getAmount(),
+        ];
     }
 }
