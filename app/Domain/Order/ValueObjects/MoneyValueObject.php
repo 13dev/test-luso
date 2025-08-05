@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Order\ValueObjects;
 
 use Cknow\Money\Money;
+use Money\Currency;
 
 final class MoneyValueObject
 {
@@ -18,16 +19,16 @@ final class MoneyValueObject
         return new self(money($amount, $currency));
     }
 
-    public function toDecimal(): float
+    public function toDecimal(): string
     {
         return $this->money->formatByDecimal();
     }
 
-    public function getAmount(): int
+    public function getAmount(): string
     {
         return $this->money->getAmount();
     }
-    public function getCurrency(): string
+    public function getCurrency(): Currency
     {
         return $this->money->getCurrency();
     }

@@ -10,6 +10,7 @@ use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV1ResponseResourc
 use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV2RequestResource;
 use App\Infrastructure\ExternalOrderApi\Resources\ExternalOrderV2ResponseResource;
 use InvalidArgumentException;
+use League\Uri\Uri;
 
 class ExternalOrderApiFactory
 {
@@ -19,12 +20,12 @@ class ExternalOrderApiFactory
             'v1' => new ExternalApiClient(
                 ExternalOrderV1RequestResource::class,
                 ExternalOrderV1ResponseResource::class,
-                config('external_orders.v1.uri')
+                Uri::new(config('external_orders.v1.uri')),
             ),
             'v2' => new ExternalApiClient(
                 ExternalOrderV2RequestResource::class,
                 ExternalOrderV2ResponseResource::class,
-                config('external_orders.v2.uri')
+                Uri::new(config('external_orders.v2.uri')),
             ),
             default => throw new InvalidArgumentException("Unsupported API version: $version")
         };

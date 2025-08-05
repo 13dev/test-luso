@@ -32,7 +32,7 @@ class Handler extends ExceptionHandler
     }
 
 
-    public function render($request, Throwable $exception): JsonResponse
+    public function render($request, Throwable $exception)
     {
         if ($exception instanceof ExternalOrderApiRequestFailedException) {
             return response()->json([
