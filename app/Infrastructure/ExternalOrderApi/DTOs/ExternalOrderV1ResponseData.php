@@ -2,24 +2,29 @@
 
 namespace App\Infrastructure\ExternalOrderApi\DTOs;
 
+use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
 
 class ExternalOrderV1ResponseData extends Data
 {
-    public function __construct(
-        public string $number,
-        public string $uuid
-    ) {}
 
+    #[MapInputName("data.uuid")]
+    public string $id;
 
-    public static function from(...$payload): static
-    {
-        // If API response wraps the object in a "data" key, unwrap it
-        if (isset($payload['data']) && is_array($payload['data'])) {
-            $payload = $payload['data'];
-        }
+    #[MapOutputName("data.number")]
+    public string $number;
 
-        return parent::from($payload);
-    }
+    #[MapOutputName("data.status")]
+    public array $status;
+
+    #[MapOutputName("data.total")]
+    public array $total;
+
+    #[MapOutputName("data.currency")]
+    public array $currency;
+
+    #[MapOutputName("data.created_at")]
+    public array $createdAt;
 
 }

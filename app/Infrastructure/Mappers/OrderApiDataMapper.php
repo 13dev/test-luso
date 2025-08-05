@@ -45,7 +45,7 @@ class OrderApiDataMapper
                             return [
                                 'sku' => $item['sku'],
                                 'qty' => $item['qty'],
-                                'unit_price' => $item['unit_price']['amount'],
+                                'price' => $item['unit_price']['amount'],
                             ];
                         })->toArray(),
                 ],

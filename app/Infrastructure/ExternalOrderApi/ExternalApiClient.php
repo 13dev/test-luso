@@ -40,7 +40,9 @@ final class ExternalApiClient implements ExternalOrderApiInterface
             );
         }
 
-        return $this->responseResource::from($response);
+
+        dd($response->json());
+        return $this->responseResource::from($response->json());
 
     }
 
