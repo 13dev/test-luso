@@ -180,8 +180,6 @@ EXTERNAL_ORDERS_API_V2_URI=https://dev.micros.services/api/v2/order
 - Make a POST Request to: http://localhost:8000/api/orders
   With body:
 ```json
-
-```
 {
     "customer": {"full_name": "João Almeida", "nif": "504321331"},
     "total": {"amount": "100.0", "currency": "EUR"},
@@ -190,64 +188,16 @@ EXTERNAL_ORDERS_API_V2_URI=https://dev.micros.services/api/v2/order
         { "sku": "NOTE-A5", "qty": 10, "unit_price": "12.00" }
     ]
 }
+```
 - Header: 'X-Order-Version' default is to v1.
 - Voila, the data is magically serialized to the external services.
 ---
-DB_CONNECTION=sqlite
-DB_DATABASE=./database.sqlite
-DB_FOREIGN_KEYS=true
 
-BROADCAST_DRIVER=log
-CACHE_DRIVER=file
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=database
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-
-MEMCACHED_HOST=127.0.0.1
-
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=smtp
-MAIL_HOST=mailpit
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${APP_NAME}"
-
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=
-AWS_USE_PATH_STYLE_ENDPOINT=false
-
-PUSHER_APP_ID=
-PUSHER_APP_KEY=
-PUSHER_APP_SECRET=
-PUSHER_HOST=
-PUSHER_PORT=443
-PUSHER_SCHEME=https
-PUSHER_APP_CLUSTER=mt1
-
-VITE_APP_NAME="${APP_NAME}"
-VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-VITE_PUSHER_HOST="${PUSHER_HOST}"
-VITE_PUSHER_PORT="${PUSHER_PORT}"
-VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
-VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-
-
-EXTERNAL_ORDERS_API_V1_URI=https://dev.micros.services/api/v1/order
-EXTERNAL_ORDERS_API_V2_URI=https://dev.micros.services/api/v2/order
 ## Design Choices
 
 ### Laravel Data Instead of JSON Resources
 - **Reason**:
-    - Laravel's `JsonResource` is tied to HTTP responses, which is **application-layer specific**.
+    - Laravel's `ApiResources` is tied to HTTP responses, which is **application-layer specific**.
     - In DDD, we want **data transformations to exist independently** of the HTTP layer.
     - [Laravel Data](https://github.com/spatie/laravel-data) allows us to:
         - Define **immutable DTOs**.
@@ -277,7 +227,7 @@ This matches **DDD's Ubiquitous Language principle**, keeping terminology aligne
 5. Add a load balancing for balance the requests (maybe by health and weights).
 6. Use NGINX as reverse proxy or traefik
 7. Rate limiting.
-8. Add ci/cd.
+8. Add ci/cd integration.
 9. Cleanup some files (frontend, etc...)
 
 
