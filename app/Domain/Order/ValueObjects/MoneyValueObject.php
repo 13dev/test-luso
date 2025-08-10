@@ -16,7 +16,7 @@ final class MoneyValueObject
 
     public static function from(string|float $amount, string $currency = 'EUR'): self
     {
-        return new self(money((float) $amount, $currency));
+        return new self(money($amount, $currency));
     }
 
     public function toDecimal(): string

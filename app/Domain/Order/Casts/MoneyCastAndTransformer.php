@@ -15,6 +15,7 @@ class MoneyCastAndTransformer implements Cast, Transformer
 {
     public function cast(DataProperty $property, mixed $value, array $properties, CreationContext $context): MoneyValueObject
     {
+
         if (is_array($value)) {
             return MoneyValueObject::from($value['amount'], $value['currency']);
         }

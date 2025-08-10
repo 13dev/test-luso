@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Mappers;
 
+use Spatie\LaravelData\Data;
+
 class OrderApiDataMapper
 {
-    public static function map($data, string $version): array
+    public static function map(Data $data, string $version): array
     {
         return match ($version) {
             'v1' => self::mapToV1($data),
